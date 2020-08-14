@@ -1,0 +1,17 @@
+<modification>
+    <code>seogenoc3</code>
+    <name>Seogen OC 3</name>
+    <version>1.0.0</version>
+    <author>eapdob</author>
+    <link>eapdob@gmail.com</link>
+    <file name="admin/model/*/*.php">
+        <operation error = "skip">
+            <search position="after"><![CDATA[$this->cache->delete]]></search>
+            <add><![CDATA[
+                /* Seogen OC 3 */
+                $this->cache->delete('seopro');
+                /* END Seogen OC 3 */
+            ]]></add>
+        </operation>
+    </file>
+</modification>

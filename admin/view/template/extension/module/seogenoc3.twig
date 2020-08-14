@@ -1,0 +1,518 @@
+{{ header }}
+<style type="text/css">
+    #form {
+        border-collapse: collapse;
+    }
+    #form tbody td {
+        padding: 5px;
+        vertical-align: top;
+    }
+    #form input[type="text"] {
+        width: 430px;
+    }
+    #form a.button {
+        float: right;
+        margin-top: 5px;
+        margin-right: 10px
+    }
+    #form td {
+        border-bottom: inherit;
+        border-right: inherit;
+    }
+    #form span.bold {
+        font-weight: bold;
+    }
+    #form input[type="text"] {
+        width: 669px;
+    }
+</style>
+<div id="content">
+    <div class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+            {{ breadcrumb['separator'] }}<a href="{{ breadcrumb['href'] }}">{{ breadcrumb['text'] }}</a>
+        {% endfor %}
+    </div>
+    {% if (error_warning) %}
+        <div class="warning">{{ error_warning }}</div>
+    {% endif %}
+    <div class="box">
+        <div class="heading">
+            <h1><img src="view/image/module.png" alt=""/> {{ heading_title }}</h1>
+            <div class="buttons">
+                <a onclick="$('#form').submit();" class="button">{{ button_save }}</a>
+                <a onclick="location = '{{ cancel }}';" class="button">{{ button_cancel }}</a>
+            </div>
+        </div>
+        <div class="content">
+            <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form">
+                <input type="hidden" name="seogenoc3[main_category_exists]" value="{{ seogenoc3['main_category_exists'] is defined and seogenoc3['main_category_exists'] ? 1 : 0 }}">
+                <table class="seogen-list" style="width: 590px;">
+                    <tbody style="border: 1px solid #003A88;">
+                    <tr>
+                        <td colspan="2"><label for="seogenoc3_status">{{ entry_status }}</label></td>
+                        <td><input id="seogenoc3_status" type="checkbox" name="seogenoc3_status" {% if (seogenoc3_status) %}{{ 'checked="checked"' }}{% endif %}></td>
+                    </tr>
+                    </tbody>
+                    <tr>
+                        <td colspan="3">&nbsp;</td>
+                    </tr>
+                </table>
+                <div id="tabs" class="htabs">
+                    <a href="#tab-categories">{{ tab_categories }}</a>
+                    <a href="#tab-products">{{ tab_products }}</a>
+                    <a href="#tab-manufacturers">{{ tab_manufacturers }}</a>
+                    <a href="#tab-news">{{ tab_news }}</a>
+                </div>
+                <div id="tab-categories">
+                    <table>
+                        <thead>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="text-align: right;"><label for="seogen_overwrite_categories">{{ entry_overwrite }}</label></td>
+                            <td><input id="seogen_overwrite_categories" class="seogen_overwrite" type="checkbox"></td>
+                        </tr>
+                        </thead>
+                        <tbody id="categories" style="border: 1px solid #003A88;">
+                        <tr>
+                            <td style="width: 120px;">{{ text_categories }}</td>
+                            <td>
+                                <input type="text" name="seogenoc3[categories_template]" value="{{ seogenoc3['categories_template'] }}"><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_categories_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[categories_overwrite]" {% if (seogenoc3['categories_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+                        {% if (seogenoc3['categories_h1_template'] is defined) %}
+                            <tr>
+                                <td style="width: 120px;">{{ text_categories_h1 }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[categories_h1_template]"
+                                           value="{{ seogenoc3['categories_h1_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_categories_h1_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[categories_h1_overwrite]" {% if (seogenoc3['categories_h1_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['categories_title_template'] is defined) %}
+                            <tr>
+                                <td style="width: 120px;">{{ text_categories_title }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[categories_title_template]"
+                                           value="{{ seogenoc3['categories_title_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_categories_title_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[categories_title_overwrite]" {% if (seogenoc3['categories_title_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['categories_meta_keyword_template'] is defined) %}
+                            <tr>
+                                <td style="width: 120px;">{{ text_categories_meta_keyword }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[categories_meta_keyword_template]"
+                                           value="{{ seogenoc3['categories_meta_keyword_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_categories_meta_keyword_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[categories_meta_keyword_overwrite]" {% if (seogenoc3['categories_meta_keyword_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['categories_meta_description_template'] is defined) %}
+                            <tr>
+                                <td style="width: 120px;">{{ text_categories_meta_description }}</td>
+                                <td>
+                                    <textarea cols="125" rows="2" name="seogenoc3[categories_meta_description_template]">{{ seogenoc3['categories_meta_description_template'] }}</textarea><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_categories_meta_description_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[categories_meta_description_overwrite]" {% if (seogenoc3['categories_meta_description_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ text_meta_description_limit}}</td>
+                                <td><input type="text" name="seogenoc3[categories_meta_description_limit]" style="width: 40px" value="{{ seogenoc3['categories_meta_description_limit']}}" size="3"></td>
+                            </tr>
+                            <tr>
+                                <td>{{ text_use_expressions}}</td>
+                                <td><input type="checkbox" name="seogenoc3[categories_use_expressions]" {% if (seogenoc3['categories_use_expressions'] is defined) %} {{ "checked='checked'" }}{% endif %}></td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <td>{{ text_categories_description }}</td>
+                            <td>
+                                <textarea data-toggle="summernote" id="categories_description_template" cols="125" rows="2" name="seogenoc3[categories_description_template]">{{ seogenoc3['categories_description_template'] }}</textarea><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_categories_description_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[categories_description_overwrite]" {% if (seogenoc3['categories_description_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="3"><a onclick="generate('categories');" class="button">{{ text_generate }}</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id ="tab-products">
+                    <table>
+                        <thead>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="text-align: right;"><label for="seogen_overwrite_products">{{ entry_overwrite }}</label></td>
+                            <td><input id="seogen_overwrite_products" class="seogen_overwrite" type="checkbox"></td>
+                        </tr>
+                        </thead>
+
+                        <tbody id="products" style="border: 1px solid #003A88;">
+                        <tr>
+                            <td>{{ text_products }}</td>
+                            <td>
+                                <input type="hidden" name="seogenoc3[product_tag_table]" value="{{ seogenoc3['product_tag_table'] is defined and seogenoc3['product_tag_table'] ? 1 : 0}}">
+                                <input type="text" name="seogenoc3[products_template]" value="{{ seogenoc3['products_template'] }}"><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_products_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[products_overwrite]" {% if (seogenoc3['products_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+                        {% if (seogenoc3['products_h1_template'] is defined) %}
+
+                            <tr>
+                                <td>{{ text_products_h1 }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[products_h1_template]" value="{{ seogenoc3['products_h1_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_products_h1_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[products_h1_overwrite]" {% if (seogenoc3['products_h1_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['products_title_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_products_title }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[products_title_template]"
+                                           value="{{ seogenoc3['products_title_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_products_title_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[products_title_overwrite]" {% if (seogenoc3['products_title_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogen['products_meta_keyword_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_products_meta_keyword }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[products_meta_keyword_template]"
+                                           value="{{ seogenoc3['products_meta_keyword_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_products_meta_keyword_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[products_meta_keyword_overwrite]" {% if (seogenoc3['products_meta_keyword_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['products_meta_description_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_products_meta_description }}</td>
+                                <td>
+                                    <textarea cols="125" rows="2" name="seogenoc3[products_meta_description_template]">{{ seogenoc3['products_meta_description_template'] }}</textarea><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_products_meta_description_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[products_meta_description_overwrite]" {% if (seogenoc3['products_meta_description_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ text_meta_description_limit }}</td>
+                                <td><input type="text" name="seogenoc3[products_meta_description_limit]" style="width: 40px" value="{{ seogenoc3['products_meta_description_limit'] }}" size="3"></td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <td>{{ text_img_alt}}</td>
+                            <td><input type="text" name="seogenoc3[products_img_alt_template]" value="{{ seogenoc3['products_img_alt_template'] is defined? seogenoc3['products_img_alt_template'] : ""}}"></td>
+                        </tr>
+                        <tr>
+                            <td>{{ text_img_title}}</td>
+                            <td><input type="text" name="seogenoc3[products_img_title_template]" value="{{ seogenoc3['products_img_title_template'] is defined? seogenoc3['products_img_title_template'] : ""}}"></td>
+                        </tr>
+                        <tr>
+                            <td>{{ text_products_description }}</td>
+                            <td>
+                                <textarea data-toogle="summernote" id="products_description_template" cols="125" rows="2" name="seogenoc3[products_description_template]">{{ seogenoc3['products_description_template'] }}</textarea><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_products_description_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[products_description_overwrite]" {% if (seogenoc3['products_description_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ text_products_tag }}</td>
+                            <td>
+                                <textarea id="text_products_tag_template" cols="125" rows="2" name="seogenoc3[products_tag_template]">{{ seogenoc3['products_tag_template'] }}</textarea><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_products_tag_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[products_tag_overwrite]" {% if (seogenoc3['products_tag_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ text_products_model }}</td>
+                            <td>
+                                <input type="text" name="seogenoc3[products_model_template]" value="{{ seogenoc3['products_model_template'] }}"><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_products_model_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[products_model_overwrite]" {% if (seogenoc3['products_model_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ text_use_expressions}}</td>
+                            <td><input type="checkbox" name="seogenoc3[products_use_expressions]" {% if (seogenoc3['products_use_expressions'] is defined) %} {{ "checked='checked'" }}{% endif %}></td>
+                        </tr>
+                        <tr>
+                            <td>{{ entry_category }}</td>
+                            <td><div class="scrollbox">
+                                    {% set class = 'odd' %}
+                                    {% set selected_categories = [] %}
+                                    {% for category in categories %}
+                                        {% set class = class == 'even' ? 'odd' : 'even' %}
+                                        <div class="{{ class }}">
+                                            {% if (in_array(category['category_id'], seogenoc3['only_categories'])) %}
+                                                <input type="checkbox" name="seogenoc3[only_categories][]" value="{{ category['category_id'] }}" checked="checked" />
+                                                {{ category['name'] }}
+                                                {% if (count(selected_categories) < 5) %}{% set selected_categories = category['name'] %}{% endif %}
+                                            {% else %}
+                                                <input type="checkbox" name="seogenoc3[only_categories][]" value="{{ category['category_id'] }}" />
+                                                {{ category['name'] }}
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <a onclick="$(this).parent().find(':checkbox').attr('checked', true);">{{ text_select_all }}</a> / <a onclick="$(this).parent().find(':checkbox').attr('checked', false);">{{ text_unselect_all }}</a>
+                                {% if (selected_categories) %}
+                                    <br/><span class="error">{{ text_limited_by ~ implode(", ", selected_categories) }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><a onclick="generate('products');" class="button">{{ text_generate }}</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id ="tab-manufacturers">
+                    <table>
+                        <thead>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="text-align: right;"><label for="seogen_overwrite_manufacturers">{{ entry_overwrite }}</label></td>
+                            <td><input id="seogen_overwrite_manufacturers" class="seogen_overwrite" type="checkbox"></td>
+                        </tr>
+                        </thead>
+                        <tbody id="manufacturers" style="border: 1px solid #003A88;">
+                        <tr>
+                            <td>{{ text_manufacturers }}</td>
+                            <td>
+                                <input type="text" name="seogenoc3[manufacturers_template]"
+                                       value="{{ seogenoc3['manufacturers_template'] }}"><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_manufacturers_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[manufacturers_overwrite]" {% if (seogenoc3['manufacturers_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+                        {% if (seogenoc3['manufacturers_h1_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_manufacturers_h1 }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[manufacturers_h1_template]"
+                                           value="{{ seogenoc3['manufacturers_h1_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_manufacturers_h1_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[manufacturers_h1_overwrite]" {% if (seogenoc3['manufacturers_h1_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['manufacturers_title_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_manufacturers_title }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[manufacturers_title_template]"
+                                           value="{{ seogenoc3['manufacturers_title_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_manufacturers_title_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[manufacturers_title_overwrite]" {% if (seogenoc3['manufacturers_title_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['manufacturers_meta_keyword_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_manufacturers_meta_keyword }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[manufacturers_meta_keyword_template]"
+                                           value="{{ seogenoc3['manufacturers_meta_keyword_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_manufacturers_meta_keyword_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[manufacturers_meta_keyword_overwrite]" {% if (seogenoc3['manufacturers_meta_keyword_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['manufacturers_meta_description_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_manufacturers_meta_description }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[manufacturers_meta_description_template]"
+                                           value="{{ seogenoc3['manufacturers_meta_description_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_manufacturers_meta_description_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[manufacturers_meta_description_overwrite]" {% if (seogenoc3['manufacturers_meta_description_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <td>{{ text_manufacturers_description }}</td>
+                            <td>
+                                <textarea data-toggle="summernote" id="manufacturers_description_template" cols="125" rows="2" name="seogenoc3[manufacturers_description_template]">{{ seogenoc3['manufacturers_description_template'] }}</textarea><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_manufacturers_description_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[manufacturers_description_overwrite]" {% if (seogenoc3['manufacturers_description_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{{ text_use_expressions}}</td>
+                            <td><input type="checkbox" name="seogenoc3[manufacturers_use_expressions]" {% if (seogen['manufacturers_use_expressions'] is defined) %} {{ "checked='checked'" }}{% endif %}></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="3"><a onclick="generate('manufacturers');" class="button">{{ text_generate }}</a></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id ="tab-news">
+                    <table>
+                        <thead>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td style="text-align: right;"><label for="seogen_overwrite_informations">{{ entry_overwrite }}</label></td>
+                            <td><input id="seogen_overwrite_informations" class="seogen_overwrite" type="checkbox"></td>
+                        </tr>
+                        </thead>
+                        <tbody id="informations" style="border: 1px solid #003A88;">
+                        <tr>
+                            <td>{{ text_informations }}</td>
+                            <td>
+                                <input type="text" name="seogenoc3[informations_template]" value="{{ seogenoc3['informations_template'] }}"><br/>
+                                {{ text_available_tags ~ ' <span class="bold">' ~ text_informations_tags ~ '</span>' }}
+                            </td>
+                            <td>
+                                <input class="overwrite" type="checkbox" name="seogenoc3[informations_overwrite]" {% if (seogenoc3['informations_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                            </td>
+                        </tr>
+                        {% if (seogenoc3['informations_h1_template'] is defined) %}
+
+                            <tr>
+                                <td>{{ text_informations_h1 }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[informations_h1_template]" value="{{ seogenoc3['informations_h1_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_informations_h1_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[informations_h1_overwrite]" {% if (seogenoc3['informations_h1_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['informations_title_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_informations_title }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[informations_title_template]"
+                                           value="{{ seogenoc3['informations_title_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_informations_title_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[informations_title_overwrite]" {% if (seogenoc3['informations_title_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['informations_meta_keyword_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_informations_meta_keyword }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[informations_meta_keyword_template]"
+                                           value="{{ seogenoc3['informations_meta_keyword_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_informations_meta_keyword_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[informations_meta_keyword_overwrite]" {% if (seogenoc3['informations_meta_keyword_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if (seogenoc3['informations_meta_description_template'] is defined) %}
+                            <tr>
+                                <td>{{ text_informations_meta_description }}</td>
+                                <td>
+                                    <input type="text" name="seogenoc3[informations_meta_description_template]"
+                                           value="{{ seogenoc3['informations_meta_description_template'] }}"><br/>
+                                    {{ text_available_tags ~ ' <span class="bold">' ~ text_informations_meta_description_tags ~ '</span>' }}
+                                </td>
+                                <td>
+                                    <input class="overwrite" type="checkbox" name="seogenoc3[informations_meta_description_overwrite]" {% if (seogenoc3['informations_meta_description_overwrite'] is defined) %} {{ "checked='checked'" }}{% endif %}>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <td colspan="3"><a onclick="generate('informations');" class="button">{{ text_generate }}</a></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            <a id="generate_url" style="display: none" href="{{ generate}}"></a>
+            <script src="view/javascript/ckeditor/ckeditor.js"></script>
+            <script>
+                function generate(selector) {
+                    $(".success").remove();
+                    //update summernote
+                    $('.summernote').each(function(i, e){
+                        if($(this).code != undefined) {
+                            $(this).val($(this).code());
+                        }
+                    });
+
+                    var data = $('#tab-' + selector + ' :input, #seogen_language_id, #including :input').serialize()
+                        + '&name=' + selector;
+                    $.post($('#generate_url').attr('href'), data, function(html) {
+                        $(".breadcrumb").after('<div class="alert alert-success"><i class="fa fa-check-circle"></i> ' +
+                            html +
+                            '<button type="button" class="close" data-dismiss="alert">&times;</button></div>');
+
+                    });
+                }
+
+                $('.seogen_overwrite').change(function(){
+                    $('.overwrite:visible').prop('checked', $(this).prop('checked'))
+                });
+
+                $(document).ready(function() {
+                    $("#form tr:even").css("background-color", "#F4F4F8");
+                });
+
+                $('#tabs a').tabs();
+            </script>
+        </div>
+    </div>
+    {{ footer }}
