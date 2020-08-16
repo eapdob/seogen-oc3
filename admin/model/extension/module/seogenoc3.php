@@ -1,6 +1,6 @@
 <?php
 
-class ModelModuleSeogenoc3 extends Model
+class ModelExtensionModuleSeogenoc3 extends Model
 {
     private $keywords = false;
     private $manufacturer_desc = false;
@@ -23,6 +23,34 @@ class ModelModuleSeogenoc3 extends Model
             $this->keywords[$row['query']] = $row['keyword'];
         }
         return $query;
+    }
+
+    public function getProfile($profile_id)
+    {
+        $query = $this->db->query("SELECT `data` FROM `" . DB_PREFIX . "seogen_profile` WHERE profile_id='" . (int)$profile_id . "'");
+        return unserialize($query->row['data']);
+    }
+
+    public function deleteProfile($profile_id)
+    {
+        $this->db->query("DELETE FROM `" . DB_PREFIX . "seogen_profile` WHERE profile_id='" . (int)$profile_id . "'");
+    }
+
+    public function getProfiles()
+    {
+        $query = $this->db->query("SELECT `profile_id`, `name` FROM `" . DB_PREFIX . "seogen_profile`");
+        return $query->rows;
+    }
+
+    public function addProfile($name, $data)
+    {
+        $query = $this->db->query("SELECT `profile_id` FROM `" . DB_PREFIX . "seogen_profile` WHERE `name` = '" . $this->db->escape($name) . "'");
+        if ($query->num_rows) {
+            $this->db->query("UPDATE `" . DB_PREFIX . "seogen_profile` SET `data` = '" . $this->db->escape($data) . "' WHERE `profile_id`= '" . (int)$query->row['profile_id'] . "'");
+        } else {
+            $this->db->query("INSERT INTO `" . DB_PREFIX . "seogen_profile`(name, data) VALUES('" . $this->db->escape($name) . "', '" . $this->db->escape($data) . "')");
+        }
+        return $this->db->getLastId();
     }
 
     public function urlifyCategory($category_id)
@@ -57,13 +85,25 @@ class ModelModuleSeogenoc3 extends Model
     {
         if (!empty($data['categories_template'])) {
             if (isset($data['categories_overwrite'])) {
-                $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query` LIKE ('category_id=%');");
+                if (isset($data['only_categories']) && count($data['only_categories'])) {
+                    foreach ($data['only_categories'] as $category) {
+                        $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query` = 'category_id=" . $this->db->escape($category) . "';");
+                    }
+                } else {
+                    $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query` LIKE ('category_id=%');");
+                }
             }
             $this->loadKeywords();
         }
 
-        foreach ($this->getCategories() as $category) {
-            $this->generateCategory($category, $data);
+        if (isset($data['only_categories']) && count($data['only_categories'])) {
+            foreach ($this->getCategoriesWithIds(implode(', ', $data['only_categories'])) as $category) {
+                $this->generateCategory($category, $data);
+            }
+        } else {
+            foreach ($this->getCategories() as $category) {
+                $this->generateCategory($category, $data);
+            }
         }
     }
 
@@ -126,17 +166,21 @@ class ModelModuleSeogenoc3 extends Model
         if (!empty($data['categories_template']) && (isset($data['categories_overwrite']) || is_null($category['keyword']))) {
             $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query`='category_id=" . (int)$category['category_id'] . "'");
             $keyword = $this->urlify($data['categories_template'], $tags);
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET `query`='category_id=" . (int)$category['category_id'] . "', keyword='" . $this->db->escape($keyword) . "'");
+            $this->load->model('localisation/language');
+            $languages = $this->model_localisation_language->getLanguages();
+            foreach($languages as $lang) {
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET `query`='category_id=" . (int)$category['category_id'] . "', keyword='" . $this->db->escape($keyword) . "', language_id = '" . $lang['language_id'] . "' ");
+            }
         }
-
 
         $updates = array();
-        if (isset($category['meta_h1']) && (isset($data['categories_h1_overwrite']) || (strlen(trim($category['meta_h1']))) == 0)) {
-            $h1 = trim(strtr($data['categories_h1_template'], $tags));
+        if (isset($category['meta_h1']) && (isset($data['categories_meta_h1_overwrite']) || (strlen(trim($category['meta_h1']))) == 0)) {
+            $h1 = trim(strtr($data['categories_meta_h1_template'], $tags));
             $updates[] = "`meta_h1`='" . $this->db->escape($h1) . "'";
         }
-        if (isset($category['meta_title']) && (isset($data['categories_title_overwrite']) || (strlen(trim($category['meta_title']))) == 0)) {
-            $categories_title_template = $data['categories_title_template'];
+
+        if (isset($category['meta_title']) && (isset($data['categories_meta_title_overwrite']) || (strlen(trim($category['meta_title']))) == 0)) {
+            $categories_title_template = $data['categories_meta_title_template'];
             if (isset($data['categories_use_expressions'])) {
                 $categories_title_template = $this->parseTemplate($categories_title_template);
             }
@@ -144,10 +188,12 @@ class ModelModuleSeogenoc3 extends Model
 
             $updates[] = "`meta_title`='" . $this->db->escape($title) . "'";
         }
+
         if (isset($category['meta_keyword']) && (isset($data['categories_meta_keyword_overwrite']) || (strlen(trim($category['meta_keyword']))) == 0)) {
             $meta_keyword = trim(strtr($data['categories_meta_keyword_template'], $tags));
             $updates[] = "`meta_keyword`='" . $this->db->escape($meta_keyword) . "'";
         }
+
         if (isset($category['meta_description']) && (isset($data['categories_meta_description_overwrite']) || (strlen(trim($category['meta_description']))) == 0)) {
             $categories_meta_description_template = $data['categories_meta_description_template'];
 
@@ -161,6 +207,7 @@ class ModelModuleSeogenoc3 extends Model
 
             $updates[] = "`meta_description`='" . $this->db->escape($meta_description) . "'";
         }
+
         if (isset($category['description']) && (isset($data['categories_description_overwrite']) || (strlen(trim($category['description']))) == 0)) {
             $categories_description_template = $data['categories_description_template'];
 
@@ -195,15 +242,19 @@ class ModelModuleSeogenoc3 extends Model
         if (!empty($data['products_template']) && (isset($data['products_overwrite']) || is_null($product['keyword']))) {
             $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query`='product_id=" . (int)$product['product_id'] . "'");
             $keyword = $this->urlify($data['products_template'], $tags);
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET `query`='product_id=" . (int)$product['product_id'] . "', keyword='" . $this->db->escape($keyword) . "'");
+            $this->load->model('localisation/language');
+            $languages = $this->model_localisation_language->getLanguages();
+            foreach($languages as $lang) {
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET `query`='product_id=" . (int)$product['product_id'] . "', keyword='" . $this->db->escape($keyword) . "', language_id = '" . $lang['language_id'] . "' ");
+            }
         }
         $updates = array();
-        if (isset($product['meta_h1']) && (isset($data['products_h1_overwrite']) || (strlen(trim($product['meta_h1']))) == 0)) {
-            $h1 = trim(strtr($data['products_h1_template'], $tags));
+        if (isset($product['meta_h1']) && (isset($data['products_meta_h1_overwrite']) || (strlen(trim($product['meta_h1']))) == 0)) {
+            $h1 = trim(strtr($data['products_meta_h1_template'], $tags));
             $updates[] = "`meta_h1`='" . $this->db->escape($h1) . "'";
         }
-        if (isset($product['meta_title']) && (isset($data['products_title_overwrite']) || (strlen(trim($product['meta_title']))) == 0)) {
-            $products_title_template = $data['products_title_template'];
+        if (isset($product['meta_title']) && (isset($data['products_meta_title_overwrite']) || (strlen(trim($product['meta_title']))) == 0)) {
+            $products_title_template = $data['products_meta_title_template'];
 
             if (isset($data['products_use_expressions'])) {
                 $products_title_template = $this->parseTemplate($products_title_template);
@@ -251,16 +302,7 @@ class ModelModuleSeogenoc3 extends Model
                 $tag = implode(",", $tags);
             }
 
-            if ($data['product_tag_table']) {
-                $this->db->query("DELETE FROM `" . DB_PREFIX . "product_tag`" .
-                    " WHERE product_id='" . (int)$product['product_id'] . "' AND language_id='" . (int)$this->config->get('config_language_id') . "'");
-                foreach ($tags as $tag) {
-                    $this->db->query("INSERT INTO `" . DB_PREFIX . "product_tag`" .
-                        " SET `tag`='" . $this->db->escape($tag) . "', product_id='" . (int)$product['product_id'] . "', language_id='" . (int)$this->config->get('config_language_id') . "'");
-                }
-            } else {
-                $updates[] = "`tag`='" . $this->db->escape($tag) . "'";
-            }
+            $updates[] = "`tag`='" . $this->db->escape($tag) . "'";
         }
 
         if (isset($product['model']) && (isset($data['products_model_overwrite']) || (strlen(trim($product['model']))) == 0)) {
@@ -284,18 +326,22 @@ class ModelModuleSeogenoc3 extends Model
         if (!empty($data['manufacturers_template']) && (isset($data['manufacturers_overwrite']) || is_null($manufacturer['keyword']))) {
             $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query`='manufacturer_id=" . (int)$manufacturer['manufacturer_id'] . "'");
             $keyword = $this->urlify($data['manufacturers_template'], $tags);
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET `query`='manufacturer_id=" . (int)$manufacturer['manufacturer_id'] . "', keyword='" . $this->db->escape($keyword) . "'");
+            $this->load->model('localisation/language');
+            $languages = $this->model_localisation_language->getLanguages();
+            foreach($languages as $lang) {
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET `query`='manufacturer_id=" . (int)$manufacturer['manufacturer_id'] . "', keyword='" . $this->db->escape($keyword) . "', language_id = '" . $lang['language_id'] . "' ");
+            }
         }
 
         if ($this->manufacturer_desc) {
             $updates = array();
-            if (isset($manufacturer['meta_h1']) && (isset($data['manufacturers_h1_overwrite']) || (strlen(trim($manufacturer['meta_h1']))) == 0)) {
-                $h1 = trim(strtr($data['manufacturers_h1_template'], $tags));
+            if (isset($manufacturer['meta_h1']) && (isset($data['manufacturers_meta_h1_overwrite']) || (strlen(trim($manufacturer['meta_h1']))) == 0)) {
+                $h1 = trim(strtr($data['manufacturers_meta_h1_template'], $tags));
                 $updates[] = "`meta_h1`='" . $this->db->escape($h1) . "'";
             }
-            if (isset($manufacturer['meta_title']) && (isset($data['manufacturers_title_overwrite']) || (strlen(trim($manufacturer['meta_title']))) == 0)) {
+            if (isset($manufacturer['meta_title']) && (isset($data['manufacturers_meta_title_overwrite']) || (strlen(trim($manufacturer['meta_title']))) == 0)) {
 
-                $manufacturers_title_template = $data['manufacturers_title_template'];
+                $manufacturers_title_template = $data['manufacturers_meta_title_template'];
                 if (isset($data['manufacturers_use_expressions'])) {
                     $manufacturers_title_template = $this->parseTemplate($manufacturers_title_template);
                 }
@@ -341,16 +387,19 @@ class ModelModuleSeogenoc3 extends Model
         if (!empty($data['informations_template']) && (isset($data['informations_overwrite']) || is_null($information['keyword']))) {
             $this->db->query("DELETE FROM `" . DB_PREFIX . "seo_url` WHERE `query`='information_id=" . (int)$information['information_id'] . "'");
             $keyword = $this->urlify($data['informations_template'], $tags);
-            $this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET `query`='information_id=" . (int)$information['information_id'] . "', keyword='" . $this->db->escape($keyword) . "'");
+            $languages = $this->model_localisation_language->getLanguages();
+            foreach($languages as $lang) {
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "seo_url` SET `query`='information_id=" . (int)$information['information_id'] . "', keyword='" . $this->db->escape($keyword) . "', language_id = '" . $lang['language_id'] . "' ");
+            }
         }
 
         $updates = array();
-        if (isset($information['meta_h1']) && (isset($data['informations_h1_overwrite']) || (strlen(trim($information['meta_h1']))) == 0)) {
-            $h1 = trim(strtr($data['informations_h1_template'], $tags));
+        if (isset($information['meta_h1']) && (isset($data['informations_meta_h1_overwrite']) || (strlen(trim($information['meta_h1']))) == 0)) {
+            $h1 = trim(strtr($data['informations_meta_h1_template'], $tags));
             $updates[] = "`meta_h1`='" . $this->db->escape($h1) . "'";
         }
-        if (isset($information['meta_title']) && (isset($data['informations_title_overwrite']) || (strlen(trim($information['meta_title']))) == 0)) {
-            $title = trim(strtr($data['informations_title_template'], $tags));
+        if (isset($information['meta_title']) && (isset($data['informations_meta_title_overwrite']) || (strlen(trim($information['meta_title']))) == 0)) {
+            $title = trim(strtr($data['informations_meta_title_template'], $tags));
             $updates[] = "`meta_title`='" . $this->db->escape($title) . "'";
         }
         if (isset($information['meta_keyword']) && (isset($data['informations_meta_keyword_overwrite']) || (strlen(trim($information['meta_keyword']))) == 0)) {
@@ -379,6 +428,16 @@ class ModelModuleSeogenoc3 extends Model
         return $query->rows;
     }
 
+    private function getCategoriesWithIds($category_ids = false)
+    {
+        $query = $this->db->query("SELECT cd.*, u.keyword FROM " . DB_PREFIX . "category_description cd" .
+            " LEFT JOIN " . DB_PREFIX . "seo_url u ON (CONCAT('category_id=', cd.category_id) = u.query)" .
+            " WHERE cd.language_id = '" . (int)$this->config->get('config_language_id') . "'" .
+            ($category_ids ? " AND cd.category_id IN ('" . $category_ids . "')" : "") .
+            " ORDER BY cd.category_id");
+        return $query->rows;
+    }
+
     private function getProducts($seogen, $product_id = false)
     {
         $seogenoc3 = $this->config->get('seogenoc3');
@@ -387,6 +446,11 @@ class ModelModuleSeogenoc3 extends Model
         $only_categories = false;
         if (isset($seogen['only_categories']) && count($seogen['only_categories'])) {
             $only_categories = implode(",", $seogen['only_categories']);
+        }
+
+        $only_manufacturers = false;
+        if (isset($seogen['only_manufacturers']) && count($seogen['only_manufacturers'])) {
+            $only_manufacturers = implode(",", $seogen['only_manufacturers']);
         }
 
         $query = $this->db->query("SELECT pd.*, m.name as 'manufacturer', p.model as 'model', p.sku, p.price, " .
@@ -404,6 +468,7 @@ class ModelModuleSeogenoc3 extends Model
             ($seogen['product_tag_table'] ? " LEFT JOIN `" . DB_PREFIX . "product_tag` pt ON (pt.product_id=p.product_id AND pt.language_id ='" . (int)$this->config->get('config_language_id') . "')" : "") .
             " WHERE pd.language_id ='" . (int)$this->config->get('config_language_id') . "'" .
             ($only_categories ? " AND p2c.category_id IN (" . $only_categories . ")" : "") .
+            ($only_manufacturers ? " AND p.manufacturer_id IN (" . $only_manufacturers. ")" : "") .
             ($product_id ? " AND p.product_id='" . (int)$product_id . "'" : "") .
             " ORDER BY p.product_id");
         if ($product_id) {
@@ -447,7 +512,6 @@ class ModelModuleSeogenoc3 extends Model
             " ORDER BY id.information_id");
         return $query->rows;
     }
-
 
     private function checkDuplicate(&$keyword)
     {
