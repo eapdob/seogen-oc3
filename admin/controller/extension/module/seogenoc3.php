@@ -16,13 +16,12 @@ class ControllerExtensionModuleSeogenoc3 extends Controller
         $data['user_token'] = $this->session->data['user_token'];
 
         if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-            $this->request->post['seogenoc3_status'] = isset($this->request->post['seogenoc3_status']) ? 1 : 0;
+            $this->request->post['seogenoc3_status'] = (isset($this->request->post['seogenoc3_status']) && $this->request->post['seogenoc3_status'] == 1) ? 1 : 0;
 
-            if (!isset($this->request->post['seogenoc3']['seogenoc3_overwrite'])) {
-                $this->request->post['seogenoc3']['seogenoc3_overwrite'] = 0;
-            }
+//            $this->request->post['seogenoc3']['seogenoc3_overwrite'] = (isset($this->request->post['seogenoc3_overwrite']) && $this->request->post['seogenoc3_overwrite'] == 1) ? 1 : 0;
 
             $this->model_setting_setting->editSetting('seogenoc3', $this->request->post);
+            //$this->model_setting_setting->editSetting('seogenoc3_status', $this->request->post['seogenoc3_status']);
 
             $this->session->data['success'] = $this->language->get('text_success');
 
@@ -143,6 +142,25 @@ class ControllerExtensionModuleSeogenoc3 extends Controller
         $seogenoc3 = $this->getDefaultTags();
 
         $this->model_setting_setting->editSetting('seogenoc3', $seogenoc3);
+
+//        $this->load->model('setting/event');
+//        $this->model_setting_event->addEvent('seogenoc3', 'admin/model/catalog/product/addProduct/after', 'extension/module/seogenoc3/eventGenProductAdd');
+//        $this->model_setting_event->addEvent('seogenoc3', 'admin/model/catalog/product/editProduct/after', 'extension/module/seogenoc3/eventGenProductEdit');
+//
+//        $this->model_setting_event->addEvent('seogenoc3', 'admin/model/catalog/category/addCategory/after', 'extension/module/seogenoc3/eventGenCategoryAdd');
+//        $this->model_setting_event->addEvent('seogenoc3', 'admin/model/catalog/category/editCategory/after', 'extension/module/seogenoc3/eventGenCategoryEdit');
+//
+//        $this->model_setting_event->addEvent('seogenoc3', 'admin/model/catalog/manufacturer/addManufacturer/after', 'extension/module/seogenoc3/eventGenManufacturerAdd');
+//        $this->model_setting_event->addEvent('seogenoc3', 'admin/model/catalog/manufacturer/editManufacturer/after', 'extension/module/seogenoc3/eventGenManufacturerEdit');
+//
+//        $this->model_setting_event->addEvent('seogenoc3', 'admin/model/catalog/information/addInformation/after', 'extension/module/seogenoc3/eventGenInformationAdd');
+//        $this->model_setting_event->addEvent('seogenoc3', 'admin/model/catalog/information/editInformation/after', 'extension/module/seogenoc3/eventGenInformationEdit');
+    }
+
+    public function uninstall()
+    {
+        $this->load->model('setting/event');
+        $this->model_setting_event->deleteEvent('seogenoc3');
     }
 
     private function getDefaultTags()
@@ -150,7 +168,7 @@ class ControllerExtensionModuleSeogenoc3 extends Controller
         $seogenoc3_tags = array(
             'seogenoc3_status' => 1,
             'seogenoc3' => array(
-                'seogenoc3_overwrite' => 1,
+//                'seogenoc3_overwrite' => 1,
                 'categories_template' => $this->language->get('text_categories_tags'),
                 'categories_meta_h1_template' => $this->language->get('text_categories_meta_h1_tags'),
                 'categories_meta_title_template' => $this->language->get('text_categories_meta_title_tags'),
@@ -231,11 +249,22 @@ class ControllerExtensionModuleSeogenoc3 extends Controller
 
     private function saveSettings($data)
     {
+        //$seogenoc3_status = (int)$data['seogenoc3_status'];
+        //$seogenoc3 = $data['seogenoc3'];
+        //$this->load->model('setting/setting');
+        //$this->model_setting_setting->editSetting('seogenoc3', array('seogenoc3' => $seogenoc3, 'seogenoc3_status' => $seogenoc3_status));
+
         $seogenoc3_status = $this->config->get('seogenoc3_status');
         $seogenoc3 = $this->config->get('seogenoc3');
         foreach ($data as $key => $val) {
-            if (in_array($key, array_keys($seogenoc3))) {
-                $seogenoc3[$key] = $val;
+            if ($key == 'seogenoc3') {
+                foreach ($val as $k => $v) {
+                    if (in_array($k, array_keys($seogenoc3))) {
+                        $seogenoc3[$k] = $v;
+                    } else {
+                        $seogenoc3[$k] = $v;
+                    }
+                }
             }
         }
         $this->load->model('setting/setting');
@@ -263,12 +292,12 @@ class ControllerExtensionModuleSeogenoc3 extends Controller
 
             $this->response->setOutput($this->language->get('text_success_generation') . "</br><b>" . $this->language->get('text_total_execution_time') . "</b> " . (microtime(true) - $time_start) .
                 "<br/>" . "<b>" . $this->language->get('text_memory_usage') . "</b> " . number_format((memory_get_usage() - $base_memory_usage) / 1024 / 1024, 2, '.', '') . "Mb");
-            $this->saveSettings($this->request->post['seogenoc3']);
+            $this->saveSettings($this->request->post);
             $this->cache->delete('seopro');
         }
     }
 
-    public function model_catalog_category_getAllCategories()
+    private function model_catalog_category_getAllCategories()
     {
         $category_data = $this->cache->get('category.all.' . $this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id'));
 
@@ -286,7 +315,7 @@ class ControllerExtensionModuleSeogenoc3 extends Controller
         return $category_data;
     }
 
-    public function model_catalog_category_getAllManufacturers()
+    private function model_catalog_category_getAllManufacturers()
     {
         $manufacturer_data = $this->cache->get('manufacturer.all.' . $this->config->get('config_language_id') . '.' . (int)$this->config->get('config_store_id'));
 
@@ -433,4 +462,120 @@ class ControllerExtensionModuleSeogenoc3 extends Controller
 
         return !$this->error;
     }
+
+//    public function eventGenCategoryAdd(&$route, &$data, &$output)
+//    {
+//        if ($this->config->get('seogenoc3_status') && $this->config->get('seogenoc3_status') == 1 && isset($data[0])) {
+//            $output_category_id = $data[0];
+//
+//            if ($output_category_id) {
+//                $this->load->language('extension/module/seogenoc3');
+//                $this->load->model('extension/module/seogenoc3');
+//                $this->model_extension_module_seogenoc3->urlifyCategory($output_category_id);
+//            }
+//        }
+//    }
+//
+//    public function eventGenCategoryEdit(&$route, &$data, &$output)
+//    {
+//        if ($this->config->get('seogenoc3_status') && $this->config->get('seogenoc3_status') == 1 && isset($data[0])) {
+//            $output_category_id = $data[0];
+//
+//            if ($output_category_id) {
+//                $this->load->language('extension/module/seogenoc3');
+//                $this->load->model('extension/module/seogenoc3');
+//                $this->model_extension_module_seogenoc3->urlifyCategory($output_category_id);
+//            }
+//        }
+//    }
+//
+//    public function eventGenProductAdd(&$route, &$data, &$output)
+//    {
+//        if ($this->config->get('seogenoc3_status') && $this->config->get('seogenoc3_status') == 1 && isset($data[0])) {
+//            $output_product_id = $data[0];
+//
+//            if ($output_product_id) {
+//                $this->load->language('extension/module/seogenoc3');
+//                $this->load->model('extension/module/seogenoc3');
+//                $this->model_extension_module_seogenoc3->urlifyProduct($output_product_id);
+//
+//                return $output_product_id;
+//            }
+//        }
+//
+//        return false;
+//    }
+//
+//    public function eventGenProductEdit(&$route, &$data, &$output)
+//    {
+//        if ($this->config->get('seogenoc3_status') && $this->config->get('seogenoc3_status') == 1 && isset($data[0])) {
+//            $output_product_id = $data[0];
+//
+//            if ($output_product_id) {
+//                $this->load->language('extension/module/seogenoc3');
+//                $this->load->model('extension/module/seogenoc3');
+//                $this->model_extension_module_seogenoc3->urlifyProduct($output_product_id);
+//            }
+//        }
+//    }
+//
+//    public function eventGenManufacturerAdd(&$route, &$data, &$output)
+//    {
+//        if ($this->config->get('seogenoc3_status') && $this->config->get('seogenoc3_status') == 1 && isset($data[0])) {
+//            $output_manufacturer_id = $data[0];
+//
+//            if ($output_manufacturer_id) {
+//                $this->load->language('extension/module/seogenoc3');
+//                $this->load->model('extension/module/seogenoc3');
+//                $this->model_extension_module_seogenoc3->urlifyManufacturer($output_manufacturer_id);
+//
+//                return $output_manufacturer_id;
+//            }
+//        }
+//
+//        return false;
+//    }
+//
+//    public function eventGenManufacturerEdit(&$route, &$data, &$output)
+//    {
+//        if ($this->config->get('seogenoc3_status') && $this->config->get('seogenoc3_status') == 1 && isset($data[0])) {
+//            $output_manufacturer_id = $data[0];
+//
+//            if ($output_manufacturer_id) {
+//                $this->load->language('extension/module/seogenoc3');
+//                $this->load->model('extension/module/seogenoc3');
+//                $this->model_extension_module_seogenoc3->urlifyManufacturer($output_manufacturer_id);
+//            }
+//        }
+//    }
+//
+//    public function eventGenInformationAdd(&$route, &$data, &$output)
+//    {
+//        if ($this->config->get('seogenoc3_status') && $this->config->get('seogenoc3_status') == 1 && isset($data[0])) {
+//            $output_information_id = $data[0];
+//
+//            if ($output_information_id) {
+//                $this->load->language('extension/module/seogenoc3');
+//                $this->load->model('extension/module/seogenoc3');
+//                $this->model_extension_module_seogenoc3->urlifyInformation($output_information_id);
+//
+//                return $output_information_id;
+//            }
+//        }
+//
+//        return false;
+//    }
+//
+//    public function eventGenInformationEdit(&$route, &$data, &$output)
+//    {
+//        if ($this->config->get('seogenoc3_status') && $this->config->get('seogenoc3_status') == 1 && isset($data[0])) {
+//            $output_information_id = $data[0];
+//
+//            if ($output_information_id) {
+//                $this->load->language('extension/module/seogenoc3');
+//                $this->load->model('extension/module/seogenoc3');
+//                $this->model_extension_module_seogenoc3->urlifyInformation($output_information_id);
+//            }
+//        }
+//    }
 }

@@ -123,11 +123,13 @@
                                 {% for category in categories %}
                                     <div>
                                         {% if category['category_id'] not in seogenoc3['only_categories'] %}
-                                            <input type="checkbox" name="seogenoc3[only_categories][]"
+                                            <input type="checkbox"
+                                                   name="seogenoc3[only_categories][]"
                                                    value="{{ category['category_id'] }}"/>
                                             {{ category['name'] }}
                                         {% else %}
-                                            <input type="checkbox" name="seogenoc3[only_categories][]"
+                                            <input type="checkbox"
+                                                   name="seogenoc3[only_categories][]"
                                                    value="{{ category['category_id'] }}" checked="checked"/>
                                             {{ category['name'] }}
                                             {% if selected_categories|length < 5 %}{% set selected_categories = category['name'] %}{% endif %}
@@ -145,11 +147,13 @@
                                 {% for manufacturer in manufacturers %}
                                     <div>
                                         {% if manufacturer['manufacturer_id'] not in seogenoc3['only_manufacturers'] %}
-                                            <input type="checkbox" name="seogenoc3[only_manufacturers][]"
+                                            <input type="checkbox"
+                                                   name="seogenoc3[only_manufacturers][]"
                                                    value="{{ manufacturer['manufacturer_id'] }}"/>
                                             {{ manufacturer['name'] }}
                                         {% else %}
-                                            <input type="checkbox" name="seogenoc3[only_manufacturers][]"
+                                            <input type="checkbox"
+                                                   name="seogenoc3[only_manufacturers][]"
                                                    value="{{ manufacturer['manufacturer_id'] }}" checked="checked"/>
                                             {{ manufacturer['name'] }}
                                             {% if selected_manufacturers|length < 5 %}{% set selected_manufacturers = manufacturer['name'] %}{% endif %}
@@ -470,7 +474,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="col-sm-2 control-label">
-                                    {{ text_categories_meta_keyword }}
+                                    {{ text_products_meta_keyword }}
                                 </label>
                                 <div class="col-sm-10">
                                     <div class="row">
@@ -570,8 +574,8 @@
                                     <div class="row">
                                         <div class="col-sm-4">
                                             <div class="form-group">
-                                                <input type="text" name="seogen[products_tag_template]"
-                                                       value="{{ seogen['products_tag_template'] }}"
+                                                <input type="text" name="seogenoc3[products_tag_template]"
+                                                       value="{{ seogenoc3['products_tag_template'] }}"
                                                        class="form-control">
                                                 <label>{{ '<span class="grey">' ~ text_available_tags ~ '</span>' ~ text_products_tag_tags }}</label>
                                             </div>
@@ -579,7 +583,7 @@
                                         <div class="col-sm-4">
                                             <input class="overwrite"
                                                    type="checkbox"
-                                                   name="seogen[products_tag_overwrite]"
+                                                   name="seogenoc3[products_tag_overwrite]"
                                                     {% if seogenoc3['products_tag_overwrite'] is defined %} {{ "checked='checked'" }} {% endif %}>
                                         </div>
                                     </div>
@@ -593,8 +597,8 @@
                                     <div class="row">
                                         <div class="col-sm-4">
                                             <div class="form-group">
-                                                <input type="text" name="seogen[products_model_template]"
-                                                       value="{{ seogen['products_model_template'] }}"
+                                                <input type="text" name="seogenoc3[products_model_template]"
+                                                       value="{{ seogenoc3['products_model_template'] }}"
                                                        class="form-control">
                                                 <label>{{ '<span class="grey">' ~ text_available_tags ~ '</span>' ~ text_products_model_tags }}</label>
                                             </div>
@@ -602,7 +606,7 @@
                                         <div class="col-sm-4">
                                             <input class="overwrite"
                                                    type="checkbox"
-                                                   name="seogen[products_model_overwrite]"
+                                                   name="seogenoc3[products_model_overwrite]"
                                                     {% if seogenoc3['products_model_overwrite'] is defined %} {{ "checked='checked'" }} {% endif %}>
                                         </div>
                                     </div>
